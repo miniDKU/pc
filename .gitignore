@@ -1,0 +1,20 @@
+# frontend 관련
+/frontend/node_modules/
+/frontend/build/
+/frontend/dist/
+/frontend/.env
+/frontend/.DS_Store
+/frontend/coverage/
+
+# backend 관련
+/backend/__pycache__/
+/backend/.env
+/backend/.DS_Store
+
+# 공통
+.DS_Store
+*.log
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

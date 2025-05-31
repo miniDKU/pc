@@ -8,6 +8,10 @@ class NaverProduct(BaseModel):
     name: str
     price: str
     link: str
+    mall: Optional[str] = None
+    category: Optional[str] = None
+    part: Optional[str] = None
+    required: bool = True  # 필수 부품 여부
 
 class GPTResponse(BaseModel):
     recommendation: str         # GPT가 생성한 추천 텍스트

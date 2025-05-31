@@ -21,8 +21,8 @@ async def fetch_naver_products(query: str, limit: int = 5):
     }
     params = {
         "query": query,
-        "display": limit,
-        "sort": "asc"  # 가격 오름차순
+        "display": limit * 2,  # 필터링을 고려해서 더 많은 결과를 가져옴
+        "sort": "rel"  # 정확도순으로 변경
     }
     
     async with httpx.AsyncClient(timeout=10.0) as client:
@@ -31,31 +31,57 @@ async def fetch_naver_products(query: str, limit: int = 5):
         data = resp.json()
     
     products = []
-    exclude_keywords = [
-        "조립", "견적", "패드", "마우스", "키보드", "세트", "완제품",
-        "쿨러", "팬", "브라켓", "UPS", "어댑터", "케이블", "리더기", "외장", "노트북", "액세서리",
-        "휴대폰", "핸드폰", "스마트폰", "폰케이스", "휴대폰케이스", "스마트폰케이스", "갤럭시", "아이폰",
-        "슬림", "미니PC", "본체", "올인원", "브랜드PC", "조립PC", "컴퓨터", "데스크탑", "세트PC"
-    ]
-    min_price = 10000  # 1만원 미만 상품 제외
+    # 부품별 제외 키워드 설정
+    common_exclude = ["중고", "리퍼", "수리", "중고거래", "매입"]
+    part_specific_exclude = {
+        "CPU": ["쿨러", "서버용"],
+        "메인보드": ["악세서리", "브라켓"],
+        "그래픽카드": ["브라켓", "라이저"],
+        "메모리": ["노트북용"],
+        "SSD": ["외장", "케이스"],
+        "파워서플라이": ["케이블", "악세서리"],
+        "케이스": ["필름", "커버", "악세서리"]
+    }
+    
+    # 현재 검색 중인 부품 타입 확인
+    current_part = None
+    for part in part_specific_exclude.keys():
+        if part in query:
+            current_part = part
+            break
+    
+    # 제외 키워드 설정
+    exclude_keywords = common_exclude.copy()
+    if current_part and current_part in part_specific_exclude:
+        exclude_keywords.extend(part_specific_exclude[current_part])
+
+    min_price = 5000  # 최소 가격 하향 조정
 
     for item in data.get("items", []):
         name = item.get("title", "이름 없음").replace("<b>", "").replace("</b>", "")
         price_int = int(item.get('lprice', 0))
+        
         # 키워드/가격 필터링
-        if any(kw in name for kw in exclude_keywords):
+        if any(kw.lower() in name.lower() for kw in exclude_keywords):
             continue
         if price_int < min_price:
             continue
+            
         price = f"{price_int:,}원"
-        # link = item.get("link", "#")
+        mall_name = item.get("mallName", "")
+        category = item.get("category1", "")
+        
         # 네이버 쇼핑 검색 링크로 대체
         search_url = f"https://search.shopping.naver.com/search/all?query={quote(name)}"
+        
         products.append({
             "name": name,
             "price": price,
-            "link": search_url
+            "link": search_url,
+            "mall": mall_name,
+            "category": category
         })
+        
         if len(products) >= limit:
             break
 

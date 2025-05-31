@@ -44,7 +44,7 @@ function App() {
         },
       ]);
     } finally {
-      setLoading(false);
+      setLoading(false); // 반드시 finally에서 loading을 false로!
     }
   };
 

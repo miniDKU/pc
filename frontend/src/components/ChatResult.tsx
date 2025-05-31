@@ -22,4 +22,6 @@ export default function ChatResult({ recommendation, products }: ChatResultProps
       <ProductTable products={products} />
     </div>
   );
-} 
+}
+
+// ...이 컴포넌트는 채팅형 UI로 변경되어 더 이상 사용되지 않습니다...

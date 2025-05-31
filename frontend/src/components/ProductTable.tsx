@@ -47,4 +47,6 @@ export default function ProductTable({ products }: ProductTableProps) {
       </table>
     </div>
   );
-} 
+}
+
+// ...이 컴포넌트는 ChatMessage 내부로 통합되어 더 이상 사용되지 않습니다...
